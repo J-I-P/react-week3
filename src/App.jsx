@@ -305,7 +305,7 @@ function App() {
                         )
                       )}
                       
-                      {tempProduct.imagesUrl.length>1 && (
+                      {tempProduct.imagesUrl?.length>1 && (
                         <button onClick={handleRemoveImage} className="btn btn-outline-danger btn-sm w-100">取消圖片</button>
                       )}
                       
