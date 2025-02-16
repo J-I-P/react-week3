@@ -217,6 +217,7 @@ function App() {
       await apiCall();
       handleCloseModal();
       getProducts();
+      console.log("更新成功");
       
     } catch (error) {
       alert("失敗");
