@@ -256,6 +256,27 @@ function App() {
     }
   }
   
+  const handleFileInputChange = async (e) => {
+    const file = e.target.files[0];
+    const formData = new FormData();
+    formData.append("file-to-upload", file);
+
+    try {
+      const res = await axios.post(`${BASE_URL}/v2/api/${API_PATH}/admin/upload`, formData);
+      const uploadedImageUrl = res.data.imageUrl;
+      setTempProduct({
+        ...tempProduct,
+        imageUrl: uploadedImageUrl
+      })
+    }catch (error) {
+      alert("上傳失敗");
+    }
+
+  }
+
+
+
+
   return (
     <>
       {isAuth ? (
@@ -368,6 +389,16 @@ function App() {
             <div className="modal-body p-4">
               <div className="row g-4">
                 <div className="col-md-4">
+                <div className="mb-5">
+                  <label htmlFor="fileInput" className="form-label"> 圖片上傳 </label>
+                  <input
+                    type="file"
+                    accept=".jpg,.jpeg,.png"
+                    className="form-control"
+                    id="fileInput"
+                    onChange={handleFileInputChange}
+                  />
+                </div>
                   <div className="mb-4">
                     <label htmlFor="primary-image" className="form-label">
                       主圖
