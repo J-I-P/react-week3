@@ -2,148 +2,151 @@ import { use, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { Modal } from "bootstrap";
 
-
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const API_PATH = import.meta.env.VITE_API_PATH;
 
-  
-function ProductModal({modalMode, tempProduct, isOpen, setIsOpen, getProducts}) {
+function ProductModal({
+  modalMode,
+  tempProduct,
+  isOpen,
+  setIsOpen,
+  getProducts,
+}) {
+  const [modalData, setModalData] = useState(tempProduct);
 
-    const [modalData, setModalData] = useState(tempProduct);
+  useEffect(() => {
+    setModalData({
+      ...tempProduct,
+    });
+  }, [tempProduct]);
 
-    useEffect(() => {
+  const productModal = useRef(null);
+
+  useEffect(() => {
+    // const modal = Modal.getOrCreateInstance(productModal.current);
+    // modal.show();
+    console.log(productModal.current);
+    new Modal(productModal.current, {
+      backdrop: false,
+    });
+
+    // Modal.getInstance(productModal.current);
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      const modal = Modal.getOrCreateInstance(productModal.current);
+      modal.show();
+    }
+  }, [isOpen]);
+
+  const handleCloseModal = () => {
+    const modal = Modal.getOrCreateInstance(productModal.current);
+    modal.hide();
+    setIsOpen(false);
+  };
+
+  const handleModalInputChange = (e) => {
+    const { value, name, checked, type } = e.target;
+
+    setModalData({
+      ...modalData,
+      [name]: type === "checkbox" ? checked : value,
+    });
+  };
+
+  const handleImageChange = (e, index) => {
+    const { value } = e.target;
+    const newImages = [...modalData.imagesUrl];
+
+    newImages[index] = value;
+    setModalData({
+      ...modalData,
+      imagesUrl: newImages,
+    });
+  };
+
+  const handleAddImage = () => {
+    const newImages = [...modalData.imagesUrl, ""];
+    setModalData({
+      ...modalData,
+      imagesUrl: newImages,
+    });
+  };
+
+  const handleRemoveImage = () => {
+    const newImages = [...modalData.imagesUrl];
+    newImages.pop();
+    setModalData({
+      ...modalData,
+      imagesUrl: newImages,
+    });
+  };
+
+  const createProduct = async () => {
+    try {
+      await axios.post(`${BASE_URL}/v2/api/${API_PATH}/admin/product`, {
+        data: {
+          ...modalData,
+          origin_price: Number(modalData.origin_price),
+          price: Number(modalData.price),
+          is_enabled: modalData.is_enabled ? 1 : 0,
+        },
+      });
+    } catch (error) {
+      console.error("失敗");
+    }
+  };
+  const updateProduct = async () => {
+    try {
+      await axios.put(
+        `${BASE_URL}/v2/api/${API_PATH}/admin/product/${modalData.id}`,
+        {
+          data: {
+            ...modalData,
+            origin_price: Number(modalData.origin_price),
+            price: Number(modalData.price),
+            is_enabled: modalData.is_enabled ? 1 : 0,
+          },
+        }
+      );
+    } catch (error) {
+      console.error("更新失敗");
+    }
+  };
+
+  const handleUpdateProduct = async () => {
+    const apiCall = modalMode === "create" ? createProduct : updateProduct;
+    try {
+      await apiCall();
+      handleCloseModal();
+      getProducts();
+      console.log("更新成功");
+    } catch (error) {
+      alert("失敗");
+    }
+  };
+
+  const handleFileInputChange = async (e) => {
+    const file = e.target.files[0];
+    const formData = new FormData();
+    formData.append("file-to-upload", file);
+
+    try {
+      const res = await axios.post(
+        `${BASE_URL}/v2/api/${API_PATH}/admin/upload`,
+        formData
+      );
+      const uploadedImageUrl = res.data.imageUrl;
       setModalData({
-        ...tempProduct});
-    }, [tempProduct]);
+        ...modalData,
+        imageUrl: uploadedImageUrl,
+      });
+    } catch (error) {
+      alert("上傳失敗");
+    }
+  };
 
-      const productModal = useRef(null);
-
-        useEffect(() => {
-          // const modal = Modal.getOrCreateInstance(productModal.current);
-          // modal.show();
-          console.log(productModal.current);
-          new Modal(productModal.current, {
-            backdrop: false,
-          });
-
-          // Modal.getInstance(productModal.current);
-        }, []);
-
-        useEffect(() => {
-          if (isOpen) {
-            const modal = Modal.getOrCreateInstance(productModal.current);
-            modal.show();
-          } 
-        }, [isOpen]);
-
-        const handleCloseModal = () => {
-            const modal = Modal.getOrCreateInstance(productModal.current);
-            modal.hide();
-            setIsOpen(false);
-          };
-
-            
-      const handleModalInputChange = (e) => {
-        const { value, name, checked, type } = e.target;
-    
-        setModalData({
-          ...modalData,
-          [name]: type === "checkbox" ? checked : value,
-        });
-      };
-    
-      const handleImageChange = (e, index) => {
-        const { value } = e.target;
-        const newImages = [...modalData.imagesUrl];
-    
-        newImages[index] = value;
-        setModalData({
-          ...modalData,
-          imagesUrl: newImages,
-        });
-      };
-    
-    
-      const handleAddImage = () => {
-        const newImages = [...modalData.imagesUrl, ''];
-        setModalData({
-          ...modalData,
-          imagesUrl: newImages,
-        });
-      };
-    
-      const handleRemoveImage = () => {
-        const newImages = [...modalData.imagesUrl];
-        newImages.pop();
-        setModalData({
-          ...modalData,
-          imagesUrl: newImages,
-        });
-      };
-
-      const createProduct = async () => {
-        try {
-          await axios.post(`${BASE_URL}/v2/api/${API_PATH}/admin/product`, {
-            data: {
-              ...modalData,
-              origin_price: Number(modalData.origin_price),
-              price: Number(modalData.price),
-              is_enabled: modalData.is_enabled?1:0
-            },
-          });
-        } catch (error) {
-          console.error("失敗");
-        }
-      };
-      const updateProduct = async () => {
-        try {
-          await axios.put(`${BASE_URL}/v2/api/${API_PATH}/admin/product/${modalData.id}`, {
-            data: {
-              ...modalData,
-              origin_price: Number(modalData.origin_price),
-              price: Number(modalData.price),
-              is_enabled: modalData.is_enabled?1:0
-            },
-          });
-        } catch (error) {
-          console.error("更新失敗");
-        }
-      };
-      
-    
-      const handleUpdateProduct = async () => {
-        const apiCall = modalMode === "create" ? createProduct : updateProduct;
-        try {
-          await apiCall();
-          handleCloseModal();
-          getProducts();
-          console.log("更新成功");
-          
-        } catch (error) {
-          alert("失敗");
-        }
-        
-      };
-    
-
-            const handleFileInputChange = async (e) => {
-              const file = e.target.files[0];
-              const formData = new FormData();
-              formData.append("file-to-upload", file);
-          
-              try {
-                const res = await axios.post(`${BASE_URL}/v2/api/${API_PATH}/admin/upload`, formData);
-                const uploadedImageUrl = res.data.imageUrl;
-                setModalData({
-                  ...modalData,
-                  imageUrl: uploadedImageUrl
-                })
-              }catch (error) {
-                alert("上傳失敗");
-              }
-          
-            }
-      
   return (
     <div
       ref={productModal}
@@ -232,9 +235,8 @@ function ProductModal({modalMode, tempProduct, isOpen, setIsOpen, getProducts}) 
                   ))}
                   <div className="btn-group w-100">
                     {modalData.imagesUrl?.length < 5 &&
-                      modalData.imagesUrl[
-                        modalData.imagesUrl.length - 1
-                      ] !== "" && (
+                      modalData.imagesUrl[modalData.imagesUrl.length - 1] !==
+                        "" && (
                         <button
                           onClick={handleAddImage}
                           className="btn btn-outline-primary btn-sm w-100"
