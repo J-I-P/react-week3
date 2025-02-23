@@ -1,6 +1,7 @@
-import { use, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { Modal } from "bootstrap";
+import Pagination from "../components/Pagination";
 
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
@@ -255,68 +256,44 @@ function ProductPage({setIsAuth}) {
     return (
         <>  
             <div className="container py-5">
-            <div className="row">
-                <div className="col">
-                <div className="d-flex justify-content-between">
-                    <h2>產品列表</h2>
-                    <button onClick={() => handleOpenModal("create")} type="button" className="btn btn-primary">建立新的產品</button>
-                </div>
-                
-                <table className="table">
-                    <thead>
-                    <tr>
-                        <th scope="col">產品名稱</th>
-                        <th scope="col">原價</th>
-                        <th scope="col">售價</th>
-                        <th scope="col">是否啟用</th>
-                        <th scope="col">查看細節</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {products.map((product) => (
-                        <tr key={product.id}>
-                        <th scope="row">{product.title}</th>
-                        <td>{product.origin_price}</td>
-                        <td>{product.price}</td>
-                        <td>{product.is_enabled? (<span className="text-success">啟用</span>):(<span className="text-danger">未啟用</span>)}</td>
-                        <td>
-                        <div className="btn-group">
-                            <button onClick={() => handleOpenModal("edit", product)} type="button" className="btn btn-outline-primary btn-sm">編輯</button>
-                            <button onClick={() => handledeleteOpenModal(product)} type="button" className="btn btn-outline-danger btn-sm">刪除</button>
-                        </div>
-                        </td>
+                <div className="row">
+                    <div className="col">
+                    <div className="d-flex justify-content-between">
+                        <h2>產品列表</h2>
+                        <button onClick={() => handleOpenModal("create")} type="button" className="btn btn-primary">建立新的產品</button>
+                    </div>
+                    
+                    <table className="table">
+                        <thead>
+                        <tr>
+                            <th scope="col">產品名稱</th>
+                            <th scope="col">原價</th>
+                            <th scope="col">售價</th>
+                            <th scope="col">是否啟用</th>
+                            <th scope="col">查看細節</th>
                         </tr>
-                    ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                        {products.map((product) => (
+                            <tr key={product.id}>
+                            <th scope="row">{product.title}</th>
+                            <td>{product.origin_price}</td>
+                            <td>{product.price}</td>
+                            <td>{product.is_enabled? (<span className="text-success">啟用</span>):(<span className="text-danger">未啟用</span>)}</td>
+                            <td>
+                            <div className="btn-group">
+                                <button onClick={() => handleOpenModal("edit", product)} type="button" className="btn btn-outline-primary btn-sm">編輯</button>
+                                <button onClick={() => handledeleteOpenModal(product)} type="button" className="btn btn-outline-danger btn-sm">刪除</button>
+                            </div>
+                            </td>
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                    </div>
+
                 </div>
-
-            </div>
-            <div className="d-flex justify-content-center">
-                <nav>
-                <ul className="pagination">
-                    <li className={`"page-item" ${!pageInfo.has_pre ? "disabled" : ""}`}>
-                    <a className="page-link" href="#" onClick={() => handlePageChange(pageInfo.current_page - 1)}>
-                        上一頁
-                    </a>
-                    </li>
-
-                    {Array.from({ length: pageInfo.total_pages }, (_, index) => (
-                    <li key={index} className={`page-item ${pageInfo.current_page === index + 1 ? "active" : ""}`}>
-                        <a onClick={() => handlePageChange(index + 1)} className="page-link" href="#">
-                        {index + 1}
-                        </a>
-                    </li>
-                    ))} 
-
-                    <li  className={`"page-item" ${!pageInfo.has_next ? "disabled" : ""}`}>
-                    <a className="page-link" href="#" onClick={() => handlePageChange(pageInfo.current_page + 1)}>
-                        下一頁
-                    </a>
-                    </li>
-                </ul>
-                </nav>
-            </div>
+                <Pagination pageInfo={pageInfo} handlePageChange={handlePageChange} />
             </div>
 
             <div ref ={productModal} id="productModal" className="modal" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
